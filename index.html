@@ -1,555 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Happy Birthday, Jaja</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Happy Birthday, Jaja ❤️</title>
 
 <style>
-  /* ==========================================================================
-     1. DESIGN TOKENS
-     ========================================================================== */
-  :root{
-    --color-bg:           #050505;
-    --color-fg:           #ffffff;
-    --color-accent:       #ff4d6d;
-    --color-accent-soft:  #ff8fb1;
-    --color-matrix:       #00ff88;
-    --color-glass:        rgba(255, 255, 255, 0.08);
-    --color-glass-border: rgba(255, 255, 255, 0.16);
+:root{
+  --color-bg:#050505;
+  --color-fg:#ffffff;
+  --color-accent:#ff4d6d;
+  --color-accent-soft:#ff8fb1;
+  --color-matrix:#00ff88;
+  --color-glass:rgba(255,255,255,.08);
+  --color-glass-border:rgba(255,255,255,.16);
 
-    --font-base: "Segoe UI", system-ui, -apple-system, sans-serif;
-    --font-mono: "Courier New", monospace;
+  --font-base:"Segoe UI",system-ui,-apple-system,sans-serif;
 
-    --transition-scene: 900ms cubic-bezier(.22, .61, .36, 1);
-    --transition-fast:  250ms ease;
+  --transition-scene:900ms cubic-bezier(.22,.61,.36,1);
+  --transition-fast:250ms ease;
 
-    --z-bg-fx:   1;
-    --z-hearts:  2;
-    --z-matrix:  3;
-    --z-vignette: 4;
-    --z-scene:   10;
-    --z-ui:      100;
+  --z-bg-fx:1;
+  --z-hearts:2;
+  --z-matrix:3;
+  --z-vignette:4;
+  --z-scene:10;
+  --z-ui:100;
+}
+
+*,
+*::before,
+*::after{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  min-height:100dvh;
+  overflow-x:hidden;
+}
+
+body{
+  font-family:var(--font-base);
+  background:var(--color-bg);
+  color:var(--color-fg);
+  text-align:center;
+  -webkit-font-smoothing:antialiased;
+
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+button{
+  font:inherit;
+  border:none;
+  background:none;
+  cursor:pointer;
+}
+
+img{
+  max-width:100%;
+  display:block;
+}
+
+/* Background Layers */
+
+.film-grain{
+  position:fixed;
+  inset:0;
+  background:url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif") center/cover;
+  opacity:.05;
+  z-index:var(--z-bg-fx);
+  pointer-events:none;
+}
+
+.vignette{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,transparent 30%,rgba(0,0,0,.85) 100%);
+  z-index:var(--z-vignette);
+  pointer-events:none;
+}
+
+.matrix-canvas{
+  position:fixed;
+  inset:0;
+  z-index:var(--z-matrix);
+  pointer-events:none;
+}
+
+/* Phone Frame */
+
+.app-shell{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:var(--z-scene);
+}
+
+.app-container{
+  position:relative;
+  width:100%;
+  height:100dvh;
+  overflow:hidden;
+}
+
+/* Laptop view = phone style */
+
+@media (min-width:1024px){
+  .app-container{
+    width:430px;
+    height:90dvh;
+    border-radius:32px;
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+      0 0 0 8px rgba(255,255,255,.03),
+      0 20px 60px rgba(0,0,0,.7);
+    overflow:hidden;
   }
+}
 
-  /* ==========================================================================
-     2. RESET
-     ========================================================================== */
-  *,
-  *::before,
-  *::after{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Scenes */
+
+.scene{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:1.5rem;
+
+  padding:2rem;
+
+  opacity:0;
+  transform:scale(1.15);
+  filter:blur(12px);
+
+  transition:
+    opacity var(--transition-scene),
+    transform var(--transition-scene),
+    filter var(--transition-scene);
+
+  pointer-events:none;
+  overflow-y:auto;
+}
+
+.scene.is-active{
+  opacity:1;
+  transform:scale(1);
+  filter:blur(0);
+  pointer-events:auto;
+}
+
+/* Countdown */
+
+.countdown{
+  font-size:clamp(64px,18vw,140px);
+  font-weight:800;
+  line-height:1;
+  text-shadow:0 0 30px var(--color-accent);
+}
+
+.countdown.is-typing{
+  font-size:clamp(28px,7vw,56px);
+}
+
+.countdown__cursor{
+  display:inline-block;
+  margin-left:4px;
+  animation:blink .9s steps(1) infinite;
+}
+
+@keyframes blink{
+  0%,49%{opacity:1}
+  50%,100%{opacity:0}
+}
+
+/* Titles */
+
+.scene-title{
+  font-size:clamp(20px,5vw,32px);
+  font-weight:600;
+}
+
+/* Surprise */
+
+.surprise-frame{
+  width:min(90vw,340px);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 0 30px rgba(255,255,255,.4);
+}
+
+/* Book */
+
+.book{
+  position:relative;
+  width:min(90vw,360px);
+  height:min(65vh,500px);
+  perspective:1500px;
+}
+
+.book__page{
+  position:absolute;
+  inset:0;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+  transform-origin:left center;
+  transition:transform 1s ease;
+  box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+.book__page img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.book__page.is-flipped{
+  transform:rotateY(-180deg);
+}
+
+.book-hint{
+  font-size:14px;
+  opacity:.75;
+}
+
+/* Note */
+
+.note{
+  width:min(92vw,500px);
+  padding:32px 28px;
+  background:var(--color-glass);
+  border:1px solid var(--color-glass-border);
+  border-radius:20px;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.note__title{
+  font-size:clamp(22px,5vw,30px);
+  margin-bottom:16px;
+}
+
+.note__body{
+  font-size:16px;
+  line-height:1.7;
+}
+
+.note__body + .note__body{
+  margin-top:12px;
+}
+
+/* Hearts */
+
+.heart{
+  position:fixed;
+  bottom:-5vh;
+  color:var(--color-accent-soft);
+  font-size:18px;
+  pointer-events:none;
+  z-index:var(--z-hearts);
+  animation:floatUp 6s linear forwards;
+}
+
+@keyframes floatUp{
+  from{
+    transform:translateY(0) rotate(0);
+    opacity:1;
   }
-
-  html, body{
-    height: 100%;
-    overflow: hidden;
+  to{
+    transform:translateY(-110vh) rotate(20deg);
+    opacity:0;
   }
+}
 
-  body{
-    font-family: var(--font-base);
-    background: var(--color-bg);
-    color: var(--color-fg);
-    text-align: center;
-    -webkit-font-smoothing: antialiased;
-  }
+/* Sound Button */
 
-  button{
-    font: inherit;
-    border: none;
-    background: none;
-    cursor: pointer;
-  }
+.sound-toggle{
+  position:fixed;
+  right:max(16px, env(safe-area-inset-right));
+  bottom:max(16px, env(safe-area-inset-bottom));
 
-  img{
-    max-width: 100%;
-    display: block;
-  }
+  z-index:var(--z-ui);
 
-  /* ==========================================================================
-     3. AMBIENT / BACKGROUND LAYERS
-     ========================================================================== */
-  .vignette{
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.85) 100%);
-    z-index: var(--z-vignette);
-    pointer-events: none;
-  }
+  display:flex;
+  align-items:center;
+  gap:8px;
 
-  .film-grain{
-    position: fixed;
-    inset: 0;
-    background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif") center / cover;
-    opacity: 0.05;
-    z-index: var(--z-bg-fx);
-    pointer-events: none;
-  }
+  padding:12px 18px;
 
-  .matrix-canvas{
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-matrix);
-    pointer-events: none;
-  }
+  border-radius:999px;
 
-  /* ==========================================================================
-     4. SCENE FRAMEWORK
-     ========================================================================== */
+  background:var(--color-accent);
+  color:#fff;
+
+  font-size:14px;
+  font-weight:600;
+
+  box-shadow:0 0 20px rgba(255,77,109,.55);
+
+  transition:transform var(--transition-fast);
+}
+
+.sound-toggle:active{
+  transform:scale(.95);
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
   .scene{
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 2rem;
-    opacity: 0;
-    transform: scale(1.25);
-    filter: blur(12px);
-    transition:
-      opacity var(--transition-scene),
-      transform var(--transition-scene),
-      filter var(--transition-scene);
-    pointer-events: none;
-    z-index: var(--z-scene);
+    padding:1.5rem;
+    gap:1rem;
   }
 
-  .scene.is-active{
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-    pointer-events: auto;
-  }
-
-  /* ----- Scene 1 — Countdown ----- */
-  .countdown{
-    font-size: clamp(64px, 18vw, 140px);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    text-shadow: 0 0 30px var(--color-accent);
-  }
-
-  .countdown.is-typing{
-    font-size: clamp(28px, 7vw, 56px);
-    letter-spacing: 0.02em;
-  }
-
-  .countdown__cursor{
-    display: inline-block;
-    margin-left: 4px;
-    animation: blink-cursor 0.9s steps(1) infinite;
-  }
-
-  @keyframes blink-cursor{
-    0%, 49%{ opacity: 1; }
-    50%, 100%{ opacity: 0; }
-  }
-
-  /* ----- Scene 2 — Loading / surprise ----- */
-  .scene-title{
-    font-size: clamp(20px, 5vw, 32px);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .surprise-frame{
-    width: min(320px, 80vw);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-  }
-
-  /* ----- Scene 3 — Flip book ----- */
   .book{
-    position: relative;
-    width: min(320px, 80vw);
-    height: min(420px, 60vh);
-    perspective: 1500px;
+    width:88vw;
+    height:60vh;
   }
 
-  .book__page{
-    position: absolute;
-    inset: 0;
-    background: var(--color-fg);
-    border-radius: 10px;
-    overflow: hidden;
-    transform-origin: left center;
-    transition: transform 1s ease;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  }
-
-  .book__page img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .book__page.is-flipped{
-    transform: rotateY(-180deg);
-  }
-
-  .book-hint{
-    font-size: 14px;
-    opacity: 0.7;
-    letter-spacing: 0.04em;
-  }
-
-  /* ----- Scene 4 — Closing note ----- */
   .note{
-    max-width: 480px;
-    width: 85%;
-    padding: 32px 28px;
-    background: var(--color-glass);
-    border: 1px solid var(--color-glass-border);
-    border-radius: 18px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-  }
-
-  .note__title{
-    font-size: clamp(22px, 5vw, 30px);
-    margin-bottom: 16px;
+    padding:24px 20px;
   }
 
   .note__body{
-    font-size: 16px;
-    line-height: 1.7;
-    opacity: 0.92;
+    font-size:15px;
   }
 
-  .note__body + .note__body{
-    margin-top: 12px;
-  }
-
-  /* ==========================================================================
-     5. FLOATING HEARTS
-     ========================================================================== */
-  .heart{
-    position: fixed;
-    bottom: -5vh;
-    color: var(--color-accent-soft);
-    font-size: 18px;
-    z-index: var(--z-hearts);
-    pointer-events: none;
-    animation: float-up 6s linear forwards;
-  }
-
-  @keyframes float-up{
-    from{ transform: translateY(0) rotate(0deg); opacity: 1; }
-    to{ transform: translateY(-110vh) rotate(20deg); opacity: 0; }
-  }
-
-  /* ==========================================================================
-     6. SOUND TOGGLE
-     ========================================================================== */
   .sound-toggle{
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: var(--z-ui);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    border-radius: 999px;
-    background: var(--color-accent);
-    color: var(--color-fg);
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 0 20px rgba(255, 77, 109, 0.55);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    padding:10px 14px;
+    font-size:13px;
+  }
+}
+
+/* Landscape phones */
+
+@media (max-height:500px){
+
+  .scene{
+    justify-content:flex-start;
+    padding-top:2rem;
   }
 
-  .sound-toggle:hover{
-    box-shadow: 0 0 28px rgba(255, 77, 109, 0.75);
+  .book{
+    height:75vh;
+    width:min(50vw,300px);
   }
 
-  .sound-toggle:active{
-    transform: scale(0.95);
+  .countdown{
+    font-size:clamp(48px,12vw,100px);
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+
+  .scene,
+  .book__page,
+  .sound-toggle{
+    transition-duration:1ms !important;
   }
 
-  .sound-toggle:focus-visible{
-    outline: 2px solid var(--color-fg);
-    outline-offset: 3px;
+  .heart{
+    display:none;
   }
-
-  /* ==========================================================================
-     7. ACCESSIBILITY — REDUCED MOTION
-     ========================================================================== */
-  @media (prefers-reduced-motion: reduce){
-    .scene,
-    .book__page,
-    .sound-toggle{
-      transition-duration: 1ms !important;
-    }
-    .heart{
-      animation: none;
-      display: none;
-    }
-  }
+}
 </style>
 </head>
 
 <body>
 
-  <!-- Background music -->
-  <audio id="bgAudio" loop preload="none">
-    <source src="https://raw.githubusercontent.com/devopcoder/PFO/main/G/lv_0_20260601171132_20260601_171239.mp3" type="audio/mpeg">
-  </audio>
+<audio id="bgAudio" loop preload="none">
+  <source src="https://raw.githubusercontent.com/devopcoder/PFO/main/G/lv_0_20260601171132_20260601_171239.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- Ambient layers -->
-  <div class="film-grain" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
+<div class="film-grain"></div>
+<div class="vignette"></div>
 
-  <!-- Sound control -->
-  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">
-    🔊 Play music
-  </button>
+<button class="sound-toggle" id="soundToggle">
+  🔊 Play music
+</button>
 
-  <!-- ======================= SCENE 1 — Countdown ======================= -->
-  <section class="scene is-active" id="scene-countdown" aria-live="polite">
-    <div class="countdown" id="countdownNumber"><span id="countdownText">3</span><span class="countdown__cursor" id="countdownCursor" hidden>|</span></div>
-  </section>
+<div class="app-shell">
+  <main class="app-container">
 
-  <!-- ======================= SCENE 2 — Surprise loading ======================= -->
-  <section class="scene" id="scene-loading">
-    <h1 class="scene-title">Loading surprise…</h1>
-    <div class="surprise-frame" id="surpriseFrame"></div>
-  </section>
+    <section class="scene is-active" id="scene-countdown">
+      <div class="countdown" id="countdownNumber">
+        <span id="countdownText">3</span>
+        <span class="countdown__cursor" id="countdownCursor" hidden>|</span>
+      </div>
+    </section>
 
-  <!-- ======================= SCENE 3 — Flip book ======================= -->
-  <section class="scene" id="scene-book">
-    <h2 class="scene-title">Tap the pages ❤️</h2>
-    <div class="book" id="book">
-      <div class="book__page"><img src="1.png" alt="Memory 1" loading="lazy"></div>
-      <div class="book__page"><img src="2.png" alt="Memory 2" loading="lazy"></div>
-      <div class="book__page"><img src="3.png" alt="Memory 3" loading="lazy"></div>
-      <div class="book__page"><img src="4.png" alt="Memory 4" loading="lazy"></div>
-      <div class="book__page"><img src="5.png" alt="Memory 5" loading="lazy"></div>
-      <div class="book__page"><img src="6.png" alt="Memory 6" loading="lazy"></div>
-      <div class="book__page"><img src="7.png" alt="Memory 7" loading="lazy"></div>
-      <div class="book__page"><img src="8.png" alt="Memory 8" loading="lazy"></div>
-      <div class="book__page"><img src="9.png" alt="Memory 9" loading="lazy"></div>
-      <div class="book__page"><img src="10.png" alt="Memory 10" loading="lazy"></div>
-    </div>
-    <p class="book-hint">Page <span id="pageCount">0</span> / 10</p>
-  </section>
+    <section class="scene" id="scene-loading">
+      <h1 class="scene-title">Loading surprise…</h1>
+      <div class="surprise-frame" id="surpriseFrame"></div>
+    </section>
 
-  <!-- ======================= SCENE 4 — Closing note ======================= -->
-  <section class="scene" id="scene-note">
-    <div class="note">
-      <h2 class="note__title">Happy Birthday, Jaja ❤️</h2>
-      <p class="note__body">I love you, Bby Jaja ❤️</p>
-      <p class="note__body">You are my favorite story, my safest place, my happiest thought.</p>
-      <p class="note__body">Enjoy your birthday, my love 😘</p>
-    </div>
-  </section>
+    <section class="scene" id="scene-book">
+      <h2 class="scene-title">Tap the pages ❤️</h2>
 
-  <script>
-  (() => {
-    "use strict";
+      <div class="book" id="book">
+        <div class="book__page"><img src="1.png" alt=""></div>
+        <div class="book__page"><img src="2.png" alt=""></div>
+        <div class="book__page"><img src="3.png" alt=""></div>
+        <div class="book__page"><img src="4.png" alt=""></div>
+        <div class="book__page"><img src="5.png" alt=""></div>
+        <div class="book__page"><img src="6.png" alt=""></div>
+        <div class="book__page"><img src="7.png" alt=""></div>
+        <div class="book__page"><img src="8.png" alt=""></div>
+        <div class="book__page"><img src="9.png" alt=""></div>
+        <div class="book__page"><img src="10.png" alt=""></div>
+      </div>
 
-    /* ------------------------------------------------------------------ *
-     * Config
-     * ------------------------------------------------------------------ */
-    const CONFIG = {
-      countdownStart: 3,
-      heartIntervalMs: 400,
-      heartLifetimeMs: 6000,
-      matrixCharacters: "HAPPYBIRTHDAYJAJA❤️".split(""),
-      matrixFontSize: 18,
-      surpriseGifSrc: "https://madeforanita.vercel.app/image/happy3.gif",
-      surpriseDurationMs: 4000,
-      typingSpeedMs: 90,
-      typingWordDelayMs: 1000,
-      typingWords: ["HAPPY", "BIRTHDAY", "JAJA MAKULIT"],
-    };
+      <p class="book-hint">
+        Page <span id="pageCount">0</span> / 10
+      </p>
+    </section>
 
-    /* ------------------------------------------------------------------ *
-     * DOM references
-     * ------------------------------------------------------------------ */
-    const dom = {
-      audio: document.getElementById("bgAudio"),
-      soundToggle: document.getElementById("soundToggle"),
-      countdownNumber: document.getElementById("countdownNumber"),
-      countdownText: document.getElementById("countdownText"),
-      countdownCursor: document.getElementById("countdownCursor"),
-      surpriseFrame: document.getElementById("surpriseFrame"),
-      book: document.getElementById("book"),
-      pageCount: document.getElementById("pageCount"),
-      scenes: document.querySelectorAll(".scene"),
-    };
+    <section class="scene" id="scene-note">
+      <div class="note">
+        <h2 class="note__title">Happy Birthday, Jaja ❤️</h2>
 
-    /* ------------------------------------------------------------------ *
-     * Scene manager
-     * ------------------------------------------------------------------ */
-    function showScene(id){
-      dom.scenes.forEach(scene => scene.classList.remove("is-active"));
-      window.setTimeout(() => {
-        document.getElementById(id)?.classList.add("is-active");
-      }, 400);
+        <p class="note__body">
+          I love you, Bby Jaja ❤️
+        </p>
+
+        <p class="note__body">
+          You are my favorite story, my safest place, my happiest thought.
+        </p>
+
+        <p class="note__body">
+          Enjoy your birthday, my love 😘
+        </p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(() => {
+  const CONFIG = {
+    countdownStart: 3,
+    heartIntervalMs: 400,
+    heartLifetimeMs: 6000,
+    matrixCharacters: "HAPPYBIRTHDAYJAJA❤️".split(""),
+    matrixFontSize: 18,
+    surpriseGifSrc: "https://madeforanita.vercel.app/image/happy3.gif",
+    surpriseDurationMs: 4000,
+    typingSpeedMs: 90,
+    typingWordDelayMs: 1000,
+    typingWords: ["HAPPY", "BIRTHDAY", "JAJA MAKULIT"]
+  };
+
+  const dom = {
+    audio: document.getElementById("bgAudio"),
+    soundToggle: document.getElementById("soundToggle"),
+    countdownNumber: document.getElementById("countdownNumber"),
+    countdownText: document.getElementById("countdownText"),
+    countdownCursor: document.getElementById("countdownCursor"),
+    surpriseFrame: document.getElementById("surpriseFrame"),
+    book: document.getElementById("book"),
+    pageCount: document.getElementById("pageCount"),
+    scenes: document.querySelectorAll(".scene")
+  };
+
+  function showScene(id){
+    dom.scenes.forEach(scene => scene.classList.remove("is-active"));
+
+    setTimeout(() => {
+      document.getElementById(id)?.classList.add("is-active");
+    }, 300);
+  }
+
+  dom.soundToggle.addEventListener("click", () => {
+    if(dom.audio.paused){
+      dom.audio.play();
+      dom.soundToggle.textContent = "🔊 Pause music";
+    }else{
+      dom.audio.pause();
+      dom.soundToggle.textContent = "🔈 Play music";
+    }
+  });
+
+  function spawnHeart(){
+    const heart = document.createElement("div");
+
+    heart.className = "heart";
+    heart.textContent = "❤️";
+    heart.style.left = Math.random() * 100 + "vw";
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => heart.remove(), CONFIG.heartLifetimeMs);
+  }
+
+  if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    setInterval(spawnHeart, CONFIG.heartIntervalMs);
+  }
+
+  function startMatrixRain(){
+    const canvas = document.createElement("canvas");
+    canvas.className = "matrix-canvas";
+
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
+
+    function resize(){
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
     }
 
-    /* ------------------------------------------------------------------ *
-     * Audio control
-     * ------------------------------------------------------------------ */
-    function toggleSound(){
-      const isPaused = dom.audio.paused;
-      isPaused ? dom.audio.play() : dom.audio.pause();
-      dom.soundToggle.setAttribute("aria-pressed", String(isPaused));
-      dom.soundToggle.textContent = isPaused ? "🔊 Pause music" : "🔈 Play music";
-    }
+    resize();
+    addEventListener("resize", resize);
 
-    dom.soundToggle.addEventListener("click", toggleSound);
+    const fontSize = CONFIG.matrixFontSize;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
 
-    /* ------------------------------------------------------------------ *
-     * Floating hearts (ambient, runs for the whole experience)
-     * ------------------------------------------------------------------ */
-    function spawnHeart(){
-      const heart = document.createElement("div");
-      heart.className = "heart";
-      heart.textContent = "❤️";
-      heart.style.left = `${Math.random() * 100}vw`;
-      heart.style.animationDuration = `${5 + Math.random() * 2}s`;
-      document.body.appendChild(heart);
-      window.setTimeout(() => heart.remove(), CONFIG.heartLifetimeMs);
-    }
+    setInterval(() => {
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!prefersReducedMotion){
-      window.setInterval(spawnHeart, CONFIG.heartIntervalMs);
-    }
+      ctx.fillStyle = "rgba(0,0,0,.08)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    /* ------------------------------------------------------------------ *
-     * Matrix rain effect
-     * ------------------------------------------------------------------ */
-    function startMatrixRain(){
-      const canvas = document.createElement("canvas");
-      canvas.className = "matrix-canvas";
-      document.getElementById("scene-countdown").appendChild(canvas);
+      ctx.fillStyle = "#00ff88";
+      ctx.font = `${fontSize}px monospace`;
 
-      const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      drops.forEach((y,i) => {
 
-      const fontSize = CONFIG.matrixFontSize;
-      const columns = Math.floor(canvas.width / fontSize);
-      const drops = new Array(columns).fill(1);
+        const char = CONFIG.matrixCharacters[
+          Math.floor(Math.random() * CONFIG.matrixCharacters.length)
+        ];
 
-      window.setInterval(() => {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText(char, i * fontSize, y * fontSize);
 
-        ctx.fillStyle = "#00ff88"; /* mirrors --color-matrix; canvas can't read CSS vars directly */
-        ctx.font = `${fontSize}px monospace`;
-
-        drops.forEach((y, i) => {
-          const char = CONFIG.matrixCharacters[
-            Math.floor(Math.random() * CONFIG.matrixCharacters.length)
-          ];
-          ctx.fillText(char, i * fontSize, y * fontSize);
-
-          const pastBottom = y * fontSize > canvas.height;
-          drops[i] = pastBottom && Math.random() > 0.975 ? 0 : y + 1;
-        });
-      }, 33);
-    }
-
-    /* ------------------------------------------------------------------ *
-     * Small async helpers
-     * ------------------------------------------------------------------ */
-    function sleep(ms){
-      return new Promise(resolve => window.setTimeout(resolve, ms));
-    }
-
-    function typeText(el, text, speed){
-      return new Promise(resolve => {
-        let i = 0;
-        const tick = () => {
-          el.textContent += text[i];
-          i += 1;
-          if (i < text.length){
-            window.setTimeout(tick, speed);
-          } else {
-            resolve();
-          }
-        };
-        tick();
+        drops[i] = y * fontSize > canvas.height && Math.random() > .975
+          ? 0
+          : y + 1;
       });
-    }
 
-    /* ------------------------------------------------------------------ *
-     * Countdown sequence: 3, 2, 1 → typewriter "HAPPY" / "BIRTHDAY" / "JAJA MAKULIT"
-     * ------------------------------------------------------------------ */
-    async function runCountdown(){
-      for (let n = CONFIG.countdownStart; n >= 1; n -= 1){
-        dom.countdownText.textContent = String(n);
-        await sleep(1000);
+    }, 33);
+  }
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function typeText(el, text, speed){
+    return new Promise(resolve => {
+
+      let i = 0;
+
+      function tick(){
+        el.textContent += text[i];
+        i++;
+
+        if(i < text.length){
+          setTimeout(tick, speed);
+        }else{
+          resolve();
+        }
       }
 
-      // Switch into typewriter mode
-      dom.countdownNumber.classList.add("is-typing");
-      dom.countdownText.textContent = "";
-      dom.countdownCursor.hidden = false;
+      tick();
+    });
+  }
 
-      for (let w = 0; w < CONFIG.typingWords.length; w += 1){
-        const word = CONFIG.typingWords[w];
-        const prefix = w === 0 ? "" : " ";
-        dom.countdownText.textContent += prefix;
-        await typeText(dom.countdownText, word, CONFIG.typingSpeedMs);
-        await sleep(CONFIG.typingWordDelayMs);
-      }
+  async function runCountdown(){
 
-      dom.countdownCursor.hidden = true;
-
-      startMatrixRain();
-      await sleep(2000);
-      showScene("scene-loading");
-      window.setTimeout(runSurpriseScene, 2000);
+    for(let n = CONFIG.countdownStart; n >= 1; n--){
+      dom.countdownText.textContent = n;
+      await sleep(1000);
     }
 
-    /* ------------------------------------------------------------------ *
-     * Surprise scene
-     * ------------------------------------------------------------------ */
-    function runSurpriseScene(){
+    dom.countdownNumber.classList.add("is-typing");
+
+    dom.countdownText.textContent = "";
+    dom.countdownCursor.hidden = false;
+
+    for(let i = 0; i < CONFIG.typingWords.length; i++){
+
+      if(i > 0){
+        dom.countdownText.textContent += " ";
+      }
+
+      await typeText(
+        dom.countdownText,
+        CONFIG.typingWords[i],
+        CONFIG.typingSpeedMs
+      );
+
+      await sleep(CONFIG.typingWordDelayMs);
+    }
+
+    dom.countdownCursor.hidden = true;
+
+    startMatrixRain();
+
+    await sleep(2000);
+
+    showScene("scene-loading");
+
+    setTimeout(() => {
+
       const img = document.createElement("img");
       img.src = CONFIG.surpriseGifSrc;
-      img.alt = "Birthday surprise animation";
+
       dom.surpriseFrame.appendChild(img);
 
-      window.setTimeout(() => showScene("scene-book"), CONFIG.surpriseDurationMs);
-    }
+      setTimeout(() => {
+        showScene("scene-book");
+      }, CONFIG.surpriseDurationMs);
 
-    /* ------------------------------------------------------------------ *
-     * Flip book interaction
-     * ------------------------------------------------------------------ */
-    function initBook(){
-      const pages = Array.from(dom.book.querySelectorAll(".book__page"));
-      let flipped = 0;
+    }, 1000);
+  }
 
-      dom.book.addEventListener("click", () => {
-        if (flipped < pages.length){
-          pages[flipped].classList.add("is-flipped");
-          flipped += 1;
-          dom.pageCount.textContent = String(flipped);
-        } else {
-          showScene("scene-note");
-        }
-      });
-    }
+  function initBook(){
 
-    /* ------------------------------------------------------------------ *
-     * Boot
-     * ------------------------------------------------------------------ */
-    initBook();
-    runCountdown();
-  })();
-  </script>
+    const pages = [...dom.book.querySelectorAll(".book__page")];
+    let flipped = 0;
+
+    dom.book.addEventListener("click", () => {
+
+      if(flipped < pages.length){
+
+        pages[flipped].classList.add("is-flipped");
+
+        flipped++;
+        dom.pageCount.textContent = flipped;
+
+      }else{
+        showScene("scene-note");
+      }
+    });
+  }
+
+  initBook();
+  runCountdown();
+
+})();
+</script>
 
 </body>
 </html>
