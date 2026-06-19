@@ -209,33 +209,61 @@ img{
   position:relative;
   width:min(90vw,360px);
   height:min(65vh,500px);
-  perspective:1500px;
+  perspective:2000px;
 }
 
 .book__page{
   position:absolute;
   inset:0;
-  background:#fff;
-  border-radius:12px;
-  overflow:hidden;
   transform-origin:left center;
+  transform-style:preserve-3d;
   transition:transform 1s ease;
-  box-shadow:0 10px 40px rgba(0,0,0,.5);
-}
-
-.book__page img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+  cursor:pointer;
 }
 
 .book__page.is-flipped{
   transform:rotateY(-180deg);
 }
 
-.book-hint{
-  font-size:14px;
-  opacity:.75;
+.page-face{
+  position:absolute;
+  inset:0;
+
+  border-radius:12px;
+  overflow:hidden;
+
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+
+  box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+.page-front{
+  background:#fff;
+}
+
+.page-front img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.page-back{
+  background:linear-gradient(135deg,#ff4d6d,#ff8fb1);
+  color:#fff;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-size:2rem;
+  font-weight:700;
+
+  transform:rotateY(180deg);
+}
+
+.page-back::before{
+  content:"❤️";
 }
 
 /* Note */
@@ -412,18 +440,59 @@ img{
     <section class="scene" id="scene-book">
       <h2 class="scene-title">Tap the pages ❤️</h2>
 
-      <div class="book" id="book">
-        <div class="book__page"><img src="1.png" alt=""></div>
-        <div class="book__page"><img src="2.png" alt=""></div>
-        <div class="book__page"><img src="3.png" alt=""></div>
-        <div class="book__page"><img src="4.png" alt=""></div>
-        <div class="book__page"><img src="5.png" alt=""></div>
-        <div class="book__page"><img src="6.png" alt=""></div>
-        <div class="book__page"><img src="7.png" alt=""></div>
-        <div class="book__page"><img src="8.png" alt=""></div>
-        <div class="book__page"><img src="9.png" alt=""></div>
-        <div class="book__page"><img src="10.png" alt=""></div>
-      </div>
+<div class="book" id="book">
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="1.png" alt="Memory 1"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="2.png" alt="Memory 2"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="3.png" alt="Memory 3"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="4.png" alt="Memory 4"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="5.png" alt="Memory 5"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="6.png" alt="Memory 6"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="7.png" alt="Memory 7"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="8.png" alt="Memory 8"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="9.png" alt="Memory 9"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+  <div class="book__page">
+    <div class="page-face page-front"><img src="10.png" alt="Memory 10"></div>
+    <div class="page-face page-back"></div>
+  </div>
+
+</div>
 
       <p class="book-hint">
         Page <span id="pageCount">0</span> / 10
@@ -629,28 +698,40 @@ img{
 
   function initBook(){
 
-    const pages = [...dom.book.querySelectorAll(".book__page")];
-    let flipped = 0;
+  const pages = [...dom.book.querySelectorAll(".book__page")];
+  let flipped = 0;
 
-    dom.book.addEventListener("click", () => {
+  pages.forEach((page, index) => {
+    page.style.zIndex = pages.length - index;
+  });
 
-      if(flipped < pages.length){
+  dom.book.addEventListener("click", () => {
 
-        pages[flipped].classList.add("is-flipped");
+    if(flipped < pages.length){
 
-        flipped++;
-        dom.pageCount.textContent = flipped;
+      pages[flipped].classList.add("is-flipped");
 
-      }else{
-        showScene("scene-note");
-      }
-    });
-  }
+      pages[flipped].style.zIndex = flipped;
 
-  initBook();
-  runCountdown();
+      flipped++;
+      dom.pageCount.textContent = flipped;
+
+    }else{
+
+      showScene("scene-note");
+
+    }
+
+  });
+
+}
+
+initBook();
+runCountdown();
 
 })();
+
+
 </script>
 
 </body>
