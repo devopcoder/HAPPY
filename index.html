@@ -2,348 +2,554 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Happy Birthday Jaja ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Happy Birthday, Jaja</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+  /* ==========================================================================
+     1. DESIGN TOKENS
+     ========================================================================== */
+  :root{
+    --color-bg:           #050505;
+    --color-fg:           #ffffff;
+    --color-accent:       #ff4d6d;
+    --color-accent-soft:  #ff8fb1;
+    --color-matrix:       #00ff88;
+    --color-glass:        rgba(255, 255, 255, 0.08);
+    --color-glass-border: rgba(255, 255, 255, 0.16);
 
-body{
-overflow:hidden;
-background:black;
-color:white;
-text-align:center;
-}
+    --font-base: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-mono: "Courier New", monospace;
 
-/* CINEMATIC LAYERS */
-body::before{
-content:"";
-position:fixed;
-width:100%;
-height:100%;
-background:radial-gradient(circle, transparent 30%, rgba(0,0,0,0.85));
-z-index:5;
-pointer-events:none;
-}
+    --transition-scene: 900ms cubic-bezier(.22, .61, .36, 1);
+    --transition-fast:  250ms ease;
 
-body::after{
-content:"";
-position:fixed;
-width:100%;
-height:100%;
-background:url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif");
-opacity:0.05;
-z-index:4;
-pointer-events:none;
-}
+    --z-bg-fx:   1;
+    --z-hearts:  2;
+    --z-matrix:  3;
+    --z-vignette: 4;
+    --z-scene:   10;
+    --z-ui:      100;
+  }
 
-/* SCENES */
-.scene{
-position:absolute;
-width:100%;
-height:100%;
-display:flex;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-opacity:0;
-transform:scale(1.3);
-filter:blur(10px);
-transition:all 1.5s ease;
-pointer-events:none;
-z-index:10;
-}
+  /* ==========================================================================
+     2. RESET
+     ========================================================================== */
+  *,
+  *::before,
+  *::after{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-.active{
-opacity:1;
-transform:scale(1);
-filter:blur(0);
-pointer-events:auto;
-}
+  html, body{
+    height: 100%;
+    overflow: hidden;
+  }
 
-/* COUNTDOWN */
-#countdown{
-font-size:140px;
-font-weight:bold;
-text-shadow:0 0 30px #ff4d6d;
-}
+  body{
+    font-family: var(--font-base);
+    background: var(--color-bg);
+    color: var(--color-fg);
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* MATRIX */
-canvas{
-position:absolute;
-top:0;
-left:0;
-z-index:6;
-}
+  button{
+    font: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
 
-/* GIF */
-#gifBox img{
-width:320px;
-border-radius:20px;
-box-shadow:0 0 30px white;
-}
+  img{
+    max-width: 100%;
+    display: block;
+  }
 
-/* BOOK */
-.book{
-width:320px;
-height:420px;
-perspective:1500px;
-}
+  /* ==========================================================================
+     3. AMBIENT / BACKGROUND LAYERS
+     ========================================================================== */
+  .vignette{
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.85) 100%);
+    z-index: var(--z-vignette);
+    pointer-events: none;
+  }
 
-.page{
-width:100%;
-height:100%;
-position:absolute;
-background:white;
-color:black;
-border-radius:10px;
-transform-origin:left;
-transition:1s;
-overflow:hidden;
-}
+  .film-grain{
+    position: fixed;
+    inset: 0;
+    background: url("https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif") center / cover;
+    opacity: 0.05;
+    z-index: var(--z-bg-fx);
+    pointer-events: none;
+  }
 
-.page img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
+  .matrix-canvas{
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-matrix);
+    pointer-events: none;
+  }
 
-.flipped{
-transform:rotateY(-180deg);
-}
+  /* ==========================================================================
+     4. SCENE FRAMEWORK
+     ========================================================================== */
+  .scene{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    opacity: 0;
+    transform: scale(1.25);
+    filter: blur(12px);
+    transition:
+      opacity var(--transition-scene),
+      transform var(--transition-scene),
+      filter var(--transition-scene);
+    pointer-events: none;
+    z-index: var(--z-scene);
+  }
 
-/* NOTE */
-.note{
-max-width:85%;
-padding:25px;
-background:rgba(255,255,255,0.1);
-border-radius:15px;
-backdrop-filter:blur(10px);
-}
+  .scene.is-active{
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+    pointer-events: auto;
+  }
 
-/* HEARTS */
-.heart{
-position:fixed;
-bottom:-20px;
-color:#ff8fb1;
-font-size:18px;
-animation:floatUp 6s linear infinite;
-z-index:2;
-}
+  /* ----- Scene 1 — Countdown ----- */
+  .countdown{
+    font-size: clamp(64px, 18vw, 140px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 30px var(--color-accent);
+  }
 
-@keyframes floatUp{
-0%{transform:translateY(0);}
-100%{transform:translateY(-110vh);}
-}
+  .countdown.is-typing{
+    font-size: clamp(28px, 7vw, 56px);
+    letter-spacing: 0.02em;
+  }
 
-/* 🎵 SOUND BUTTON */
-.sound-btn{
-position:fixed;
-right:20px;
-bottom:20px;
-z-index:9999;
-background:#ff4d6d;
-color:white;
-padding:12px 16px;
-border-radius:50px;
-cursor:pointer;
-font-size:14px;
-box-shadow:0 0 20px rgba(255,77,109,0.6);
-user-select:none;
-}
+  .countdown__cursor{
+    display: inline-block;
+    margin-left: 4px;
+    animation: blink-cursor 0.9s steps(1) infinite;
+  }
 
-.sound-btn:active{
-transform:scale(0.95);
-}
+  @keyframes blink-cursor{
+    0%, 49%{ opacity: 1; }
+    50%, 100%{ opacity: 0; }
+  }
 
+  /* ----- Scene 2 — Loading / surprise ----- */
+  .scene-title{
+    font-size: clamp(20px, 5vw, 32px);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .surprise-frame{
+    width: min(320px, 80vw);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  }
+
+  /* ----- Scene 3 — Flip book ----- */
+  .book{
+    position: relative;
+    width: min(320px, 80vw);
+    height: min(420px, 60vh);
+    perspective: 1500px;
+  }
+
+  .book__page{
+    position: absolute;
+    inset: 0;
+    background: var(--color-fg);
+    border-radius: 10px;
+    overflow: hidden;
+    transform-origin: left center;
+    transition: transform 1s ease;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .book__page img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .book__page.is-flipped{
+    transform: rotateY(-180deg);
+  }
+
+  .book-hint{
+    font-size: 14px;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+  }
+
+  /* ----- Scene 4 — Closing note ----- */
+  .note{
+    max-width: 480px;
+    width: 85%;
+    padding: 32px 28px;
+    background: var(--color-glass);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 18px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .note__title{
+    font-size: clamp(22px, 5vw, 30px);
+    margin-bottom: 16px;
+  }
+
+  .note__body{
+    font-size: 16px;
+    line-height: 1.7;
+    opacity: 0.92;
+  }
+
+  .note__body + .note__body{
+    margin-top: 12px;
+  }
+
+  /* ==========================================================================
+     5. FLOATING HEARTS
+     ========================================================================== */
+  .heart{
+    position: fixed;
+    bottom: -5vh;
+    color: var(--color-accent-soft);
+    font-size: 18px;
+    z-index: var(--z-hearts);
+    pointer-events: none;
+    animation: float-up 6s linear forwards;
+  }
+
+  @keyframes float-up{
+    from{ transform: translateY(0) rotate(0deg); opacity: 1; }
+    to{ transform: translateY(-110vh) rotate(20deg); opacity: 0; }
+  }
+
+  /* ==========================================================================
+     6. SOUND TOGGLE
+     ========================================================================== */
+  .sound-toggle{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: var(--z-ui);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-fg);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 0 20px rgba(255, 77, 109, 0.55);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .sound-toggle:hover{
+    box-shadow: 0 0 28px rgba(255, 77, 109, 0.75);
+  }
+
+  .sound-toggle:active{
+    transform: scale(0.95);
+  }
+
+  .sound-toggle:focus-visible{
+    outline: 2px solid var(--color-fg);
+    outline-offset: 3px;
+  }
+
+  /* ==========================================================================
+     7. ACCESSIBILITY — REDUCED MOTION
+     ========================================================================== */
+  @media (prefers-reduced-motion: reduce){
+    .scene,
+    .book__page,
+    .sound-toggle{
+      transition-duration: 1ms !important;
+    }
+    .heart{
+      animation: none;
+      display: none;
+    }
+  }
 </style>
 </head>
 
 <body>
 
-<!-- AUDIO -->
-<audio id="audio">
-<source src="https://raw.githubusercontent.com/devopcoder/PFO/main/G/lv_0_20260601171132_20260601_171239.mp3">
-</audio>
+  <!-- Background music -->
+  <audio id="bgAudio" loop preload="none">
+    <source src="https://raw.githubusercontent.com/devopcoder/PFO/main/G/lv_0_20260601171132_20260601_171239.mp3" type="audio/mpeg">
+  </audio>
 
-<!-- SOUND BUTTON -->
-<div class="sound-btn" onclick="toggleSound()">
-🔊 Play Music
-</div>
+  <!-- Ambient layers -->
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
 
-<!-- SCENES -->
+  <!-- Sound control -->
+  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">
+    🔊 Play music
+  </button>
 
-<div class="scene active" id="scene1">
-<div id="countdown">3</div>
-</div>
+  <!-- ======================= SCENE 1 — Countdown ======================= -->
+  <section class="scene is-active" id="scene-countdown" aria-live="polite">
+    <div class="countdown" id="countdownNumber"><span id="countdownText">3</span><span class="countdown__cursor" id="countdownCursor" hidden>|</span></div>
+  </section>
 
-<div class="scene" id="scene2">
-<h1>Loading Surprise...</h1>
-<div id="gifBox"></div>
-</div>
+  <!-- ======================= SCENE 2 — Surprise loading ======================= -->
+  <section class="scene" id="scene-loading">
+    <h1 class="scene-title">Loading surprise…</h1>
+    <div class="surprise-frame" id="surpriseFrame"></div>
+  </section>
 
-<div class="scene" id="scene3">
-<h2>Click Pages ❤️</h2>
-<div class="book" id="book">
-<div class="page"><img src="1.png"></div>
-<div class="page"><img src="2.png"></div>
-<div class="page"><img src="3.png"></div>
-<div class="page"><img src="4.png"></div>
-<div class="page"><img src="5.png"></div>
-<div class="page"><img src="6.png"></div>
-<div class="page"><img src="7.png"></div>
-<div class="page"><img src="8.png"></div>
-<div class="page"><img src="9.png"></div>
-<div class="page"><img src="10.png"></div>
-</div>
-</div>
+  <!-- ======================= SCENE 3 — Flip book ======================= -->
+  <section class="scene" id="scene-book">
+    <h2 class="scene-title">Tap the pages ❤️</h2>
+    <div class="book" id="book">
+      <div class="book__page"><img src="1.png" alt="Memory 1" loading="lazy"></div>
+      <div class="book__page"><img src="2.png" alt="Memory 2" loading="lazy"></div>
+      <div class="book__page"><img src="3.png" alt="Memory 3" loading="lazy"></div>
+      <div class="book__page"><img src="4.png" alt="Memory 4" loading="lazy"></div>
+      <div class="book__page"><img src="5.png" alt="Memory 5" loading="lazy"></div>
+      <div class="book__page"><img src="6.png" alt="Memory 6" loading="lazy"></div>
+      <div class="book__page"><img src="7.png" alt="Memory 7" loading="lazy"></div>
+      <div class="book__page"><img src="8.png" alt="Memory 8" loading="lazy"></div>
+      <div class="book__page"><img src="9.png" alt="Memory 9" loading="lazy"></div>
+      <div class="book__page"><img src="10.png" alt="Memory 10" loading="lazy"></div>
+    </div>
+    <p class="book-hint">Page <span id="pageCount">0</span> / 10</p>
+  </section>
 
-<div class="scene" id="scene4">
-<div class="note">
-<h2>Happy Birthday, Jaja ❤️</h2>
-<p>
-I Love You, Bby Jaja ❤️<br><br>
-You are my favorite story, my safest place, my happiest thought.<br><br>
-Enjoy your 16th birthday my love 😘
-</p>
-</div>
-</div>
+  <!-- ======================= SCENE 4 — Closing note ======================= -->
+  <section class="scene" id="scene-note">
+    <div class="note">
+      <h2 class="note__title">Happy Birthday, Jaja ❤️</h2>
+      <p class="note__body">I love you, Bby Jaja ❤️</p>
+      <p class="note__body">You are my favorite story, my safest place, my happiest thought.</p>
+      <p class="note__body">Enjoy your birthday, my love 😘</p>
+    </div>
+  </section>
 
-<script>
+  <script>
+  (() => {
+    "use strict";
 
-let audio=document.getElementById("audio");
-let isPlaying=false;
+    /* ------------------------------------------------------------------ *
+     * Config
+     * ------------------------------------------------------------------ */
+    const CONFIG = {
+      countdownStart: 3,
+      heartIntervalMs: 400,
+      heartLifetimeMs: 6000,
+      matrixCharacters: "HAPPYBIRTHDAYJAJA❤️".split(""),
+      matrixFontSize: 18,
+      surpriseGifSrc: "https://madeforanita.vercel.app/image/happy3.gif",
+      surpriseDurationMs: 4000,
+      typingSpeedMs: 90,
+      typingWordDelayMs: 1000,
+      typingWords: ["HAPPY", "BIRTHDAY", "JAJA MAKULIT"],
+    };
 
-/* 🎵 MANUAL SOUND CONTROL */
-function toggleSound() {
-  const audio = document.getElementById("audio");
+    /* ------------------------------------------------------------------ *
+     * DOM references
+     * ------------------------------------------------------------------ */
+    const dom = {
+      audio: document.getElementById("bgAudio"),
+      soundToggle: document.getElementById("soundToggle"),
+      countdownNumber: document.getElementById("countdownNumber"),
+      countdownText: document.getElementById("countdownText"),
+      countdownCursor: document.getElementById("countdownCursor"),
+      surpriseFrame: document.getElementById("surpriseFrame"),
+      book: document.getElementById("book"),
+      pageCount: document.getElementById("pageCount"),
+      scenes: document.querySelectorAll(".scene"),
+    };
 
-  if (audio.paused) {
-    audio.play();
-  } else {
-    audio.pause();
-  }
-}
+    /* ------------------------------------------------------------------ *
+     * Scene manager
+     * ------------------------------------------------------------------ */
+    function showScene(id){
+      dom.scenes.forEach(scene => scene.classList.remove("is-active"));
+      window.setTimeout(() => {
+        document.getElementById(id)?.classList.add("is-active");
+      }, 400);
+    }
 
-/* SCENE SWITCH */
-function showScene(n){
-document.querySelectorAll('.scene').forEach(s=>{
-s.classList.remove('active');
-});
-setTimeout(()=>{
-document.getElementById('scene'+n).classList.add('active');
-},500);
-}
+    /* ------------------------------------------------------------------ *
+     * Audio control
+     * ------------------------------------------------------------------ */
+    function toggleSound(){
+      const isPaused = dom.audio.paused;
+      isPaused ? dom.audio.play() : dom.audio.pause();
+      dom.soundToggle.setAttribute("aria-pressed", String(isPaused));
+      dom.soundToggle.textContent = isPaused ? "🔊 Pause music" : "🔈 Play music";
+    }
 
-/* HEARTS */
-setInterval(()=>{
-let h=document.createElement("div");
-h.className="heart";
-h.innerHTML="❤️";
-h.style.left=Math.random()*100+"vw";
-document.body.appendChild(h);
-setTimeout(()=>h.remove(),6000);
-},400);
+    dom.soundToggle.addEventListener("click", toggleSound);
 
-/* COUNTDOWN */
-let count=3;
+    /* ------------------------------------------------------------------ *
+     * Floating hearts (ambient, runs for the whole experience)
+     * ------------------------------------------------------------------ */
+    function spawnHeart(){
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = "❤️";
+      heart.style.left = `${Math.random() * 100}vw`;
+      heart.style.animationDuration = `${5 + Math.random() * 2}s`;
+      document.body.appendChild(heart);
+      window.setTimeout(() => heart.remove(), CONFIG.heartLifetimeMs);
+    }
 
-let timer=setInterval(()=>{
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefersReducedMotion){
+      window.setInterval(spawnHeart, CONFIG.heartIntervalMs);
+    }
 
-count--;
+    /* ------------------------------------------------------------------ *
+     * Matrix rain effect
+     * ------------------------------------------------------------------ */
+    function startMatrixRain(){
+      const canvas = document.createElement("canvas");
+      canvas.className = "matrix-canvas";
+      document.getElementById("scene-countdown").appendChild(canvas);
 
-if(count>1){
-document.getElementById("countdown").innerText=count;
-}
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
-else if(count===1){
-document.getElementById("countdown").innerText="1";
-}
+      const fontSize = CONFIG.matrixFontSize;
+      const columns = Math.floor(canvas.width / fontSize);
+      const drops = new Array(columns).fill(1);
 
-else if(count===0){
-document.getElementById("countdown").innerText="HAPPY BIRTHDAY JAJA";
-}
+      window.setInterval(() => {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-else{
-clearInterval(timer);
+        ctx.fillStyle = "#00ff88"; /* mirrors --color-matrix; canvas can't read CSS vars directly */
+        ctx.font = `${fontSize}px monospace`;
 
-setTimeout(()=>{
-showMatrix();
+        drops.forEach((y, i) => {
+          const char = CONFIG.matrixCharacters[
+            Math.floor(Math.random() * CONFIG.matrixCharacters.length)
+          ];
+          ctx.fillText(char, i * fontSize, y * fontSize);
 
-setTimeout(()=>{
-showScene(2);
+          const pastBottom = y * fontSize > canvas.height;
+          drops[i] = pastBottom && Math.random() > 0.975 ? 0 : y + 1;
+        });
+      }, 33);
+    }
 
-setTimeout(scene2,2000);
-},2000);
+    /* ------------------------------------------------------------------ *
+     * Small async helpers
+     * ------------------------------------------------------------------ */
+    function sleep(ms){
+      return new Promise(resolve => window.setTimeout(resolve, ms));
+    }
 
-},2000);
-}
+    function typeText(el, text, speed){
+      return new Promise(resolve => {
+        let i = 0;
+        const tick = () => {
+          el.textContent += text[i];
+          i += 1;
+          if (i < text.length){
+            window.setTimeout(tick, speed);
+          } else {
+            resolve();
+          }
+        };
+        tick();
+      });
+    }
 
-},1000);
+    /* ------------------------------------------------------------------ *
+     * Countdown sequence: 3, 2, 1 → typewriter "HAPPY" / "BIRTHDAY" / "JAJA MAKULIT"
+     * ------------------------------------------------------------------ */
+    async function runCountdown(){
+      for (let n = CONFIG.countdownStart; n >= 1; n -= 1){
+        dom.countdownText.textContent = String(n);
+        await sleep(1000);
+      }
 
-/* MATRIX */
-function showMatrix(){
-let c=document.createElement("canvas");
-document.getElementById("scene1").appendChild(c);
-let x=c.getContext("2d");
+      // Switch into typewriter mode
+      dom.countdownNumber.classList.add("is-typing");
+      dom.countdownText.textContent = "";
+      dom.countdownCursor.hidden = false;
 
-c.width=innerWidth;
-c.height=innerHeight;
+      for (let w = 0; w < CONFIG.typingWords.length; w += 1){
+        const word = CONFIG.typingWords[w];
+        const prefix = w === 0 ? "" : " ";
+        dom.countdownText.textContent += prefix;
+        await typeText(dom.countdownText, word, CONFIG.typingSpeedMs);
+        await sleep(CONFIG.typingWordDelayMs);
+      }
 
-let letters="HAPPYBIRTHDAYJAJA❤️".split("");
-let font=18;
-let cols=c.width/font;
-let drops=Array(Math.floor(cols)).fill(1);
+      dom.countdownCursor.hidden = true;
 
-setInterval(()=>{
-x.fillStyle="rgba(0,0,0,0.08)";
-x.fillRect(0,0,c.width,c.height);
+      startMatrixRain();
+      await sleep(2000);
+      showScene("scene-loading");
+      window.setTimeout(runSurpriseScene, 2000);
+    }
 
-x.fillStyle="#00ff88";
-x.font=font+"px monospace";
+    /* ------------------------------------------------------------------ *
+     * Surprise scene
+     * ------------------------------------------------------------------ */
+    function runSurpriseScene(){
+      const img = document.createElement("img");
+      img.src = CONFIG.surpriseGifSrc;
+      img.alt = "Birthday surprise animation";
+      dom.surpriseFrame.appendChild(img);
 
-for(let i=0;i<drops.length;i++){
-let t=letters[Math.floor(Math.random()*letters.length)];
-x.fillText(t,i*font,drops[i]*font);
+      window.setTimeout(() => showScene("scene-book"), CONFIG.surpriseDurationMs);
+    }
 
-if(drops[i]*font>c.height && Math.random()>0.975){
-drops[i]=0;
-}
-drops[i]++;
-}
-},33);
-}
+    /* ------------------------------------------------------------------ *
+     * Flip book interaction
+     * ------------------------------------------------------------------ */
+    function initBook(){
+      const pages = Array.from(dom.book.querySelectorAll(".book__page"));
+      let flipped = 0;
 
-/* SCENE 2 */
-function scene2(){
-document.getElementById("gifBox").innerHTML=
-`<img src="https://madeforanita.vercel.app/image/happy3.gif">`;
+      dom.book.addEventListener("click", () => {
+        if (flipped < pages.length){
+          pages[flipped].classList.add("is-flipped");
+          flipped += 1;
+          dom.pageCount.textContent = String(flipped);
+        } else {
+          showScene("scene-note");
+        }
+      });
+    }
 
-setTimeout(()=>{
-showScene(3);
-},4000);
-}
-
-/* BOOK */
-let pages=document.querySelectorAll(".page");
-let i=0;
-
-document.getElementById("book").onclick=()=>{
-if(i<pages.length){
-pages[i].classList.add("flipped");
-i++;
-}
-else{
-showScene(4);
-}
-}
-
-</script>
+    /* ------------------------------------------------------------------ *
+     * Boot
+     * ------------------------------------------------------------------ */
+    initBook();
+    runCountdown();
+  })();
+  </script>
 
 </body>
 </html>
